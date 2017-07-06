@@ -1,11 +1,14 @@
 package com.example.gonzalez.myapplication;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -29,6 +32,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.xendit.Models.Card;
+import com.xendit.Models.Token;
+import com.xendit.Models.XenditError;
+import com.xendit.TokenCallback;
 import com.xendit.Xendit;
 
 import java.util.ArrayList;
@@ -94,9 +101,44 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-        Xendit xendit = new Xendit(this, "test");
-        System.out.println("XENDIT CLASS: " + xendit.getClass().toString());
-        System.out.println("XENDIT isCvnValid: " + xendit.isCvnValid("123"));
+
+        Xendit xendit = new Xendit(getApplicationContext(), "xnd_public_development_O4iFfuQhgLOsl8M9eeEYGzeWYNH3otV5w3Dh/BFj/mHW+72nCQR/");
+        System.out.println("Xendit Class: " + xendit.getClass().toString());
+        System.out.println("Xendit isCvnValid: " + xendit.isCvnValid("123"));
+
+        int PERMISSION_ALL = 1;
+        String[] PERMISSIONS = {Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.INTERNET};
+
+        ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+
+        Card card = new Card("4000000000000002", "12", "2017", "123");
+        boolean isMultipleUse = true;
+
+        xendit.createToken(card, "75000", isMultipleUse, new TokenCallback() {
+            @Override
+            public void onSuccess(Token token) {
+                System.out.println("Successfully obtained token");
+            }
+
+            @Override
+            public void onError(XenditError xenditError) {
+                System.out.println("An error occurred");
+            }
+        });
+    }
+
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null)
+        {
+            for (String permission : permissions)
+            {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void populateAutoComplete() {
